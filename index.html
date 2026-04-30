@@ -1,0 +1,1274 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Планувальник бюджету</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+
+  /* Soft pastel palette — like cream, peach, sage, lavender */
+  :root {
+    --bg: #fdf6e3;
+    --bg-2: #f5e6d3;
+    --ink: #2d1810;
+    --ink-soft: #5c4a3a;
+    --ink-faded: #8b7d6f;
+    --accent: #c2410c;
+
+    /* Soft pastel category fills — airy and gentle */
+    --pastel-cream:    #fdf6e3;
+    --pastel-peach:    #fdf0e8;
+    --pastel-sage:     #f0f4ec;
+    --pastel-lavender: #f3f0fa;
+    --pastel-rose:     #fbeef0;
+    --pastel-sky:      #ecf3f7;
+    --pastel-butter:   #fdf5d9;
+    --pastel-mint:     #ecf5ee;
+
+    /* Border colors — very soft, barely visible */
+    --border-cream:    rgba(139, 111, 71, 0.18);
+    --border-peach:    rgba(193, 110, 60, 0.14);
+    --border-sage:     rgba(94, 124, 80, 0.14);
+    --border-lavender: rgba(111, 96, 153, 0.14);
+    --border-rose:     rgba(184, 92, 100, 0.14);
+    --border-sky:      rgba(80, 122, 145, 0.14);
+    --border-butter:   rgba(176, 142, 40, 0.16);
+    --border-mint:     rgba(70, 138, 100, 0.14);
+  }
+
+  body {
+    background: linear-gradient(135deg, #fdf6e3 0%, #f5e6d3 100%);
+    background-attachment: fixed;
+    min-height: 100vh;
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    -webkit-font-smoothing: antialiased;
+  }
+  ul { list-style: none; padding: 0; margin: 0; }
+  h1, h2, h3, p { margin: 0; }
+  button { font-family: inherit; }
+
+  .container { max-width: 64rem; margin: 0 auto; padding: 2.5rem 1rem; }
+  @media (min-width: 768px) { .container { padding: 2.5rem 1.5rem; } }
+
+  .header {
+    margin-bottom: 2.5rem;
+    border-bottom: 1px solid #292524;
+    padding-bottom: 1.5rem;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .eyebrow {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.5rem;
+  }
+  .title {
+    font-family: 'Fraunces', serif;
+    font-feature-settings: 'ss01', 'ss02';
+    font-weight: 600;
+    font-size: 3rem;
+    line-height: 1;
+    letter-spacing: -0.025em;
+    color: var(--ink);
+  }
+  @media (min-width: 768px) { .title { font-size: 3.75rem; } }
+  .title em { font-weight: 300; font-style: italic; }
+  .header-controls { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+
+  /* Cards — soft pastel fills, gentle borders */
+  .card {
+    background: rgba(255, 251, 240, 0.7);
+    backdrop-filter: blur(8px);
+    border: 1px solid var(--border-cream);
+    border-radius: 1rem;
+    padding: 1.25rem;
+    transition: all 0.2s;
+  }
+  .card-lg { padding: 1.5rem; }
+
+  /* Pastel category fills — same palette as tickets */
+  .card-c-cream    { background: var(--pastel-cream);    border-color: var(--border-cream); }
+  .card-c-peach    { background: var(--pastel-peach);    border-color: var(--border-peach); }
+  .card-c-butter   { background: var(--pastel-butter);   border-color: var(--border-butter); }
+  .card-c-sage     { background: var(--pastel-sage);     border-color: var(--border-sage); }
+  .card-c-mint     { background: var(--pastel-mint);     border-color: var(--border-mint); }
+  .card-c-sky      { background: var(--pastel-sky);      border-color: var(--border-sky); }
+  .card-c-lavender { background: var(--pastel-lavender); border-color: var(--border-lavender); }
+  .card-c-rose     { background: var(--pastel-rose);     border-color: var(--border-rose); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+  }
+  .card-header-left { display: flex; align-items: center; gap: 0.55rem; flex: 1; min-width: 0; }
+  .card-emoji {
+    font-size: 1.05rem;
+    cursor: pointer;
+    user-select: none;
+    flex-shrink: 0;
+    line-height: 1;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .card-emoji:hover { background: rgba(0, 0, 0, 0.05); }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed transparent;
+    padding: 2px 4px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .card-title:focus, .card-title:hover { border-bottom-color: var(--ink-soft); }
+  .card-total {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid rgba(139, 111, 71, 0.25);
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+  }
+  .card-total-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-soft); }
+  .card-total-value { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.125rem; color: var(--ink); }
+
+  /* Tickets */
+  .ticket {
+    position: relative;
+    background: var(--pastel-cream);
+    border: 1px solid var(--ink);
+    border-radius: 1rem;
+    padding: 1.25rem;
+  }
+  .ticket::before, .ticket::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: var(--bg-2);
+    border: 1px solid var(--ink);
+    border-radius: 50%;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+  .ticket::before { left: -9px; }
+  .ticket::after { right: -9px; }
+
+  .ticket-c-cream    { background: var(--pastel-cream); }
+  .ticket-c-peach    { background: var(--pastel-peach); }
+  .ticket-c-sage     { background: var(--pastel-sage); }
+  .ticket-c-lavender { background: var(--pastel-lavender); }
+  .ticket-c-rose     { background: var(--pastel-rose); }
+  .ticket-c-sky      { background: var(--pastel-sky); }
+  .ticket-c-butter   { background: var(--pastel-butter); }
+  .ticket-c-mint     { background: var(--pastel-mint); }
+
+  .ticket-eyebrow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+  .ticket-eyebrow-left {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+    font-weight: 500;
+  }
+  .ticket-emoji {
+    font-size: 0.95rem;
+    cursor: pointer;
+    user-select: none;
+    line-height: 1;
+    padding: 2px;
+    border-radius: 4px;
+    transition: background 0.15s;
+  }
+  .ticket-emoji:hover { background: rgba(0, 0, 0, 0.05); }
+  .ticket-title-input {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 1.25rem;
+    color: var(--ink);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed transparent;
+    padding: 2px 4px;
+    outline: none;
+    width: 100%;
+    margin-bottom: 0.25rem;
+  }
+  .ticket-title-input:focus, .ticket-title-input:hover { border-bottom-color: var(--ink-soft); }
+  .ticket-sub-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ink-soft);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed transparent;
+    padding: 2px 4px;
+    outline: none;
+    width: 100%;
+    margin-bottom: 0.75rem;
+  }
+  .ticket-sub-input:focus, .ticket-sub-input:hover { border-bottom-color: var(--ink-soft); }
+  .ticket-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    border-top: 1px dashed var(--ink-faded);
+    padding-top: 0.75rem;
+  }
+  .ticket-amount { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.5rem; color: var(--ink); }
+  .ticket-amount-warn { color: #b91c1c; }
+
+  .ticket-config {
+    margin-top: 0.5rem;
+    padding-top: 0.5rem;
+    border-top: 1px dashed rgba(139, 111, 71, 0.3);
+    font-size: 0.7rem;
+    color: var(--ink-soft);
+  }
+  .ticket-config-summary {
+    cursor: pointer;
+    user-select: none;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .ticket-config-summary::-webkit-details-marker { display: none; }
+  .ticket-config-summary::before {
+    content: "▸";
+    font-size: 0.8rem;
+    transition: transform 0.15s;
+  }
+  details[open] .ticket-config-summary::before { transform: rotate(90deg); }
+  .ticket-config-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+
+  .row { display: flex; align-items: center; justify-content: space-between; gap: 0.5rem; margin-top: 0.625rem; }
+  .row-label-input {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.875rem;
+    color: var(--ink-soft);
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed transparent;
+    padding: 2px 4px;
+    outline: none;
+    flex: 1;
+    min-width: 0;
+  }
+  .row-label-input:focus, .row-label-input:hover { border-bottom-color: var(--ink-soft); }
+  .row-input-wrap { display: flex; align-items: baseline; gap: 0.4rem; flex-shrink: 0; }
+  .row-unit { font-size: 0.75rem; color: var(--ink-soft); min-width: 1.5rem; }
+
+  input[type="number"]::-webkit-inner-spin-button,
+  input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+  input[type="number"] { -moz-appearance: textfield; }
+
+  .num-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1.5px dashed var(--ink-soft);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.95rem;
+    padding: 2px 4px;
+    width: 100px;
+    text-align: right;
+    color: var(--ink);
+    outline: none;
+    transition: all 0.2s;
+  }
+  .num-input:focus { border-bottom: 1.5px solid var(--accent); background: rgba(194, 65, 12, 0.05); }
+  .num-input-sm { width: 80px; }
+
+  select {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.875rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid var(--ink);
+    padding: 0.25rem 0.5rem;
+    outline: none;
+    cursor: pointer;
+    color: var(--ink);
+  }
+
+  .income-section { margin-bottom: 2rem; }
+  .income-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+  .income-label { display: flex; align-items: center; gap: 0.75rem; }
+  .income-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.5rem; color: var(--ink); }
+  .income-input { font-family: 'Fraunces', serif !important; font-weight: 600 !important; font-size: 1.5rem !important; width: 180px !important; }
+
+  .main-grid { display: grid; grid-template-columns: 1fr; gap: 1.5rem; margin-bottom: 2rem; }
+  @media (min-width: 768px) { .main-grid { grid-template-columns: 1fr 1fr; } }
+  .col-stack { display: flex; flex-direction: column; gap: 1rem; }
+  .col-section-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--ink-faded);
+    margin-bottom: -0.25rem;
+    padding-left: 0.5rem;
+  }
+
+  .summary {
+    background: rgba(255, 251, 240, 0.7);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border-cream);
+    border-radius: 1rem;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  .summary-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; text-align: center; }
+  @media (min-width: 768px) { .summary-grid { grid-template-columns: repeat(3, 1fr); } }
+  .stat-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--ink-soft); margin-bottom: 0.25rem; }
+  .stat-value { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.5rem; color: var(--ink); }
+  .stat-value-red { color: #b91c1c; }
+  .stat-value-green { color: #15803d; }
+  .stat-unit { font-family: 'DM Mono', monospace; font-size: 0.875rem; font-weight: 400; color: var(--ink-faded); }
+
+  .actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding-bottom: 2.5rem; }
+  .btn-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1.25rem;
+    border-radius: 9999px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--ink); color: #fafaf9; }
+  .btn-primary:hover { background: #44403c; }
+  .btn-secondary { background: transparent; color: var(--ink); border-color: var(--ink); }
+  .btn-secondary:hover { background: rgba(45, 24, 16, 0.05); }
+  .btn-mini {
+    padding: 0.35rem 0.7rem;
+    font-size: 0.75rem;
+    background: transparent;
+    color: var(--ink-soft);
+    border: 1px solid var(--ink-faded);
+    border-radius: 9999px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    transition: all 0.15s;
+  }
+  .btn-mini:hover { background: var(--ink); color: #fafaf9; border-color: var(--ink); }
+  .btn-mini:disabled { opacity: 0.5; cursor: wait; }
+
+  .btn-add {
+    width: 100%;
+    margin-top: 0.625rem;
+    padding: 0.5rem;
+    background: transparent;
+    border: 1.5px dashed rgba(139, 111, 71, 0.4);
+    border-radius: 0.5rem;
+    color: var(--ink-faded);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+  }
+  .btn-add:hover { border-color: var(--ink-soft); color: var(--ink); background: rgba(255, 255, 255, 0.4); }
+  .btn-add-ticket { background: rgba(255, 251, 240, 0.4); }
+
+  .btn-icon {
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    color: var(--ink-faded);
+    padding: 4px;
+    display: inline-flex;
+    align-items: center;
+    border-radius: 4px;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .btn-icon:hover { color: #b91c1c; background: rgba(185, 28, 28, 0.08); }
+
+  .actions-note { font-size: 0.75rem; color: var(--ink-faded); max-width: 28rem; text-align: right; }
+  .empty { text-align: center; padding: 1rem 0; font-size: 0.85rem; color: var(--ink-faded); font-style: italic; }
+
+  .currency-config {
+    background: rgba(255, 251, 240, 0.5);
+    border: 1px dashed var(--border-cream);
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+  }
+  .currency-info { font-size: 0.7rem; color: var(--ink-faded); margin-left: auto; font-style: italic; }
+  .currency-info.error { color: #b91c1c; }
+
+  /* Tag chips for card config */
+  .tag-chip {
+    padding: 0.25rem 0.6rem;
+    font-size: 0.7rem;
+    font-family: 'DM Mono', monospace;
+    border-radius: 9999px;
+    cursor: pointer;
+    transition: all 0.15s;
+    border: 1px solid var(--ink-faded);
+  }
+  .tag-chip-on { background: var(--ink); color: #fafaf9; border-color: var(--ink); }
+  .tag-chip-off { background: transparent; color: var(--ink-soft); }
+  .tag-chip-off:hover { background: rgba(45, 24, 16, 0.05); }
+
+  @keyframes saveFlash {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); background: #16a34a; }
+    100% { transform: scale(1); }
+  }
+  .save-flash { animation: saveFlash 0.5s ease; }
+  @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+  .spinning { animation: spin 1s linear infinite; }
+
+  .icon { display: inline-block; vertical-align: middle; flex-shrink: 0; }
+
+  .modal-bg {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+    display: flex; align-items: center; justify-content: center;
+    padding: 1rem; z-index: 100;
+  }
+  .modal {
+    background: var(--bg);
+    border-radius: 1rem;
+    padding: 2rem;
+    max-width: 460px; width: 100%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    max-height: 90vh; overflow-y: auto;
+  }
+  .modal h3 { font-family: 'Fraunces', serif; font-weight: 600; font-size: 1.5rem; margin-bottom: 0.5rem; }
+  .modal p { font-size: 0.875rem; color: var(--ink-soft); margin-bottom: 1.5rem; line-height: 1.5; }
+  .modal-actions { display: flex; gap: 0.75rem; justify-content: flex-end; flex-wrap: wrap; }
+  .modal-input {
+    font-family: 'DM Mono', monospace; font-size: 1rem;
+    padding: 0.5rem; border: 1px solid var(--ink-faded);
+    border-radius: 0.5rem; width: 100%; background: white;
+  }
+  .modal-label { display: block; font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.4rem; }
+  .modal-field { margin-bottom: 1rem; }
+
+  /* PRINT */
+  .print-area { display: none; }
+
+  @media print {
+    @page { size: A4; margin: 1.5cm; }
+    body { background: white !important; }
+    .no-print { display: none !important; }
+    .print-area { display: block !important; font-family: 'DM Mono', monospace; color: #1c1917; }
+    .print-area .pa-title { font-family: 'Fraunces', serif; font-size: 28pt; font-weight: 600; margin: 0; letter-spacing: -0.02em; }
+    .print-area .pa-subtitle { font-family: 'DM Mono', monospace; font-size: 9pt; letter-spacing: 0.1em; text-transform: uppercase; color: #57534e; margin-bottom: 4pt; }
+    .print-area .pa-header { border-bottom: 1pt solid #292524; padding-bottom: 12pt; margin-bottom: 18pt; display: flex; justify-content: space-between; align-items: flex-end; }
+    .print-area .pa-income { border: 1pt solid #d6d3d1; padding: 12pt; border-radius: 8pt; margin-bottom: 14pt; display: flex; justify-content: space-between; align-items: center; }
+    .print-area .pa-income-label { font-family: 'Fraunces', serif; font-size: 14pt; font-weight: 600; }
+    .print-area .pa-income-value { font-family: 'Fraunces', serif; font-size: 16pt; font-weight: 600; }
+    .print-area .pa-section { page-break-inside: avoid; margin-bottom: 12pt; }
+    .print-area .pa-section-title { font-family: 'DM Mono', monospace; font-size: 8pt; letter-spacing: 0.15em; text-transform: uppercase; color: #78716c; margin-bottom: 8pt; border-bottom: 0.5pt solid #d6d3d1; padding-bottom: 4pt; }
+    .print-area .pa-group { margin-bottom: 10pt; page-break-inside: avoid; }
+    .print-area .pa-group-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 12pt; margin-bottom: 4pt; }
+    .print-area .pa-row { display: flex; justify-content: space-between; font-size: 9pt; padding: 2pt 0; border-bottom: 0.3pt dotted #d6d3d1; }
+    .print-area .pa-row-total { display: flex; justify-content: space-between; padding-top: 4pt; margin-top: 4pt; border-top: 0.5pt solid #292524; font-family: 'Fraunces', serif; font-weight: 600; font-size: 11pt; }
+    .print-area .pa-card { border: 0.7pt solid #2d1810; padding: 8pt 12pt; border-radius: 6pt; margin-bottom: 8pt; page-break-inside: avoid; }
+    .print-area .pa-card-title { font-family: 'Fraunces', serif; font-weight: 600; font-size: 12pt; }
+    .print-area .pa-card-sub { font-size: 8pt; color: #57534e; margin-bottom: 4pt; }
+    .print-area .pa-card-row { display: flex; justify-content: space-between; align-items: baseline; border-top: 0.3pt dashed #a8a29e; padding-top: 4pt; margin-top: 4pt; }
+    .print-area .pa-card-amount { font-family: 'Fraunces', serif; font-weight: 600; font-size: 13pt; }
+    .print-area .pa-card-tags { font-size: 8pt; color: #78716c; margin-top: 2pt; }
+    .print-area .pa-summary { margin-top: 14pt; padding-top: 10pt; border-top: 1pt solid #292524; display: flex; justify-content: space-between; gap: 12pt; }
+    .print-area .pa-stat-label { font-size: 8pt; letter-spacing: 0.1em; text-transform: uppercase; color: #57534e; }
+    .print-area .pa-stat-value { font-family: 'Fraunces', serif; font-weight: 600; font-size: 14pt; }
+    .print-area .pa-stat-red { color: #b91c1c; }
+    .print-area .pa-stat-green { color: #15803d; }
+    .print-area .pa-foot { margin-top: 18pt; font-size: 7pt; color: #a8a29e; text-align: center; }
+    .print-area .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 14pt; }
+  }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+const MONTHS = [
+  "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень",
+  "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень"
+];
+
+const STORAGE_PREFIX = "budget_v2:";
+const SETTINGS_KEY = "budget_v2_settings";
+
+const newId = () => Math.random().toString(36).slice(2, 10);
+
+const DEFAULT_TEMPLATE = () => {
+  const fixedTitle = "Фіксовані";
+  const regularTitle = "Регулярні витрати";
+  const goalsTitle = "Заощадження та цілі";
+  const pleasureTitle = "На приємне";
+
+  return {
+    income: 0,
+    groups: [
+      { id: newId(), title: fixedTitle, emoji: "🏠", color: "cream", items: [
+        { id: newId(), label: "Житло", amount: 0, currency: "main" },
+        { id: newId(), label: "Комунальні", amount: 0, currency: "main" },
+        { id: newId(), label: "Інтернет / звʼязок", amount: 0, currency: "main" },
+        { id: newId(), label: "Підписки", amount: 0, currency: "main" },
+      ]},
+      { id: newId(), title: regularTitle, emoji: "☕", color: "cream", items: [
+        { id: newId(), label: "Продукти", amount: 0, currency: "main" },
+        { id: newId(), label: "Транспорт", amount: 0, currency: "main" },
+        { id: newId(), label: "Кафе / їжа поза домом", amount: 0, currency: "main" },
+      ]},
+      { id: newId(), title: goalsTitle, emoji: "🌱", color: "cream", items: [
+        { id: newId(), label: "Інвестиції", amount: 0, currency: "main" },
+        { id: newId(), label: "Подушка / накопичення", amount: 0, currency: "main" },
+      ]},
+      { id: newId(), title: pleasureTitle, emoji: "✨", color: "cream", items: [
+        { id: newId(), label: "Розваги", amount: 0, currency: "main" },
+        { id: newId(), label: "Імпульсивне", amount: 0, currency: "main" },
+      ]},
+    ],
+    cards: [
+      { id: newId(), eyebrow: "Картка 1", emoji: "💳", title: "Життя", subtitle: "Регулярні щоденні витрати", groupTitleRefs: [regularTitle], color: "cream" },
+      { id: newId(), eyebrow: "Картка 2", emoji: "✨", title: "На приємне", subtitle: "Окрема картка, тільки звідти", groupTitleRefs: [pleasureTitle], color: "peach" },
+      { id: newId(), eyebrow: "Рахунок", emoji: "📋", title: "Обовʼязкові платежі", subtitle: "Чекає дати оплати", groupTitleRefs: [fixedTitle], color: "butter" },
+      { id: newId(), eyebrow: "Перекази", emoji: "🌱", title: "Інвестиції & пенсія", subtitle: "Відправити одразу", groupTitleRefs: [goalsTitle], color: "sage" },
+      { id: newId(), eyebrow: "Подушка", emoji: "🐷", title: "Накопичувальний", subtitle: "Рахунок без картки", groupTitleRefs: [], color: "lavender" },
+    ],
+  };
+};
+
+const DEFAULT_SETTINGS = {
+  mainCurrency: "грн",
+  secondaryCurrency: "",
+  rate: 1,
+  rateSource: "manual",
+  rateUpdatedAt: null,
+};
+
+const POPULAR_CURRENCIES = [
+  { code: "", label: "— без другої валюти —" },
+  { code: "EUR", label: "Євро (EUR)" },
+  { code: "USD", label: "Долар США (USD)" },
+  { code: "PLN", label: "Польський злотий (PLN)" },
+];
+
+const NBU_SUPPORTED = ["EUR", "USD", "PLN"];
+
+const TICKET_COLOR_OPTIONS = [
+  { code: "cream",    label: "Кремова" },
+  { code: "peach",    label: "Персикова" },
+  { code: "butter",   label: "Вершкова" },
+  { code: "sage",     label: "Шавлієва" },
+  { code: "mint",     label: "Мʼятна" },
+  { code: "sky",      label: "Небесна" },
+  { code: "lavender", label: "Лавандова" },
+  { code: "rose",     label: "Трояндова" },
+];
+
+async function fetchNbuRate(currencyCode) {
+  const url = `https://bank.gov.ua/NBUStatService/v1/statdirectory/exchange?valcode=${currencyCode}&json`;
+  const response = await fetch(url);
+  if (!response.ok) throw new Error("Не вдалося отримати курс");
+  const data = await response.json();
+  if (!data || !data.length) throw new Error("Курс не знайдено");
+  return { rate: data[0].rate, exchangeDate: data[0].exchangedate };
+}
+
+const Icon = ({ name, size = 18, color, className = "" }) => {
+  const paths = {
+    wallet: <><path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/><path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/><path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/></>,
+    calendar: <><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></>,
+    save: <><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></>,
+    reset: <><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></>,
+    refresh: <><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M3 21v-5h5"/></>,
+    trash: <><path d="M3 6h18"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></>,
+    plus: <><path d="M5 12h14"/><path d="M12 5v14"/></>,
+    settings: <><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></>,
+    pdf: <><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/><path d="M9 11h6"/></>,
+  };
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color || "currentColor"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={"icon " + className}>
+      {paths[name]}
+    </svg>
+  );
+};
+
+function App() {
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [data, setData] = useState(DEFAULT_TEMPLATE);
+  const [settings, setSettings] = useState(DEFAULT_SETTINGS);
+  const [savedMonths, setSavedMonths] = useState([]);
+  const [savedFlash, setSavedFlash] = useState(false);
+  const [showResetModal, setShowResetModal] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [rateLoading, setRateLoading] = useState(false);
+  const [rateError, setRateError] = useState(null);
+
+  useEffect(() => {
+    const s = localStorage.getItem(SETTINGS_KEY);
+    if (s) {
+      try { setSettings({ ...DEFAULT_SETTINGS, ...JSON.parse(s) }); } catch (e) {}
+    }
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  }, [settings]);
+
+  useEffect(() => {
+    const months = [];
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith(STORAGE_PREFIX)) {
+        months.push(key.replace(STORAGE_PREFIX, ""));
+      }
+    }
+    months.sort().reverse();
+    setSavedMonths(months);
+  }, [savedFlash]);
+
+  const migrate = (parsed) => {
+    const defaultEmojis = ["🏠", "☕", "🌱", "✨", "🎀", "🍰"];
+    if (parsed.groups) {
+      parsed.groups = parsed.groups.map((g, i) => ({
+        emoji: g.emoji || defaultEmojis[i % defaultEmojis.length],
+        color: g.color || "cream",
+        ...g,
+      }));
+    }
+    if (parsed.cards) {
+      const colorCycle = ["cream", "peach", "butter", "sage", "lavender", "rose"];
+      const emojiCycle = ["💳", "✨", "📋", "🌱", "🐷", "💎"];
+      parsed.cards = parsed.cards.map((c, i) => ({
+        eyebrow: c.eyebrow || "Картка",
+        color: c.color || colorCycle[i % colorCycle.length],
+        emoji: c.emoji || emojiCycle[i % emojiCycle.length],
+        ...c,
+      }));
+    }
+    return parsed;
+  };
+
+  useEffect(() => {
+    const stored = localStorage.getItem(STORAGE_PREFIX + selectedMonth);
+    if (stored) {
+      try { setData(migrate(JSON.parse(stored))); return; } catch (e) {}
+    }
+    if (savedMonths.length > 0) {
+      const prev = localStorage.getItem(STORAGE_PREFIX + savedMonths[0]);
+      if (prev) {
+        try { setData(migrate(JSON.parse(prev))); return; } catch (e) {}
+      }
+    }
+    setData(DEFAULT_TEMPLATE());
+  }, [selectedMonth]);
+
+  const refreshNbuRate = async () => {
+    if (!settings.secondaryCurrency) return;
+    const code = settings.secondaryCurrency.toUpperCase();
+    if (!NBU_SUPPORTED.includes(code)) {
+      setRateError("НБУ не дає курс для цієї валюти");
+      return;
+    }
+    setRateLoading(true);
+    setRateError(null);
+    try {
+      const result = await fetchNbuRate(code);
+      setSettings(prev => ({
+        ...prev, rate: result.rate, rateSource: "nbu", rateUpdatedAt: result.exchangeDate,
+      }));
+    } catch (e) {
+      setRateError("Не вдалося оновити курс. Перевір інтернет.");
+    } finally {
+      setRateLoading(false);
+    }
+  };
+
+  const saveMonth = () => {
+    try {
+      localStorage.setItem(STORAGE_PREFIX + selectedMonth, JSON.stringify(data));
+      setSavedFlash(true);
+      setTimeout(() => setSavedFlash(false), 1500);
+    } catch (e) { alert("Не вдалося зберегти: " + e.message); }
+  };
+
+  const exportPdf = () => {
+    try { localStorage.setItem(STORAGE_PREFIX + selectedMonth, JSON.stringify(data)); } catch (e) {}
+    const prevTitle = document.title;
+    document.title = `Бюджет — ${formatMonthLabel(selectedMonth)}`;
+    setTimeout(() => { window.print(); document.title = prevTitle; }, 100);
+  };
+
+  const resetMonth = () => { setData(DEFAULT_TEMPLATE()); setShowResetModal(false); };
+
+  const formatMonthLabel = (ymStr) => {
+    const [y, m] = ymStr.split("-");
+    return `${MONTHS[parseInt(m) - 1]} ${y}`;
+  };
+
+  const toMain = (amount, currency) => {
+    if (currency === "secondary" && settings.rate) return amount * settings.rate;
+    return amount;
+  };
+  const formatMain = (n) => Math.round(n).toLocaleString("uk") + " " + settings.mainCurrency;
+
+  const groupTotal = (group) =>
+    group.items.reduce((sum, item) => sum + toMain(Number(item.amount) || 0, item.currency), 0);
+
+  const totalSpent = data.groups.reduce((sum, g) => sum + groupTotal(g), 0);
+  const remainder = (Number(data.income) || 0) - totalSpent;
+
+  const cardTotal = (card) =>
+    data.groups.filter(g => card.groupTitleRefs.includes(g.title)).reduce((sum, g) => sum + groupTotal(g), 0);
+
+  const updateGroup = (groupId, updater) => {
+    setData(prev => ({ ...prev, groups: prev.groups.map(g => g.id === groupId ? updater(g) : g) }));
+  };
+  const updateGroupTitle = (groupId, newTitle) => {
+    setData(prev => {
+      const oldTitle = prev.groups.find(g => g.id === groupId)?.title;
+      return {
+        ...prev,
+        groups: prev.groups.map(g => g.id === groupId ? { ...g, title: newTitle } : g),
+        cards: prev.cards.map(c => ({ ...c, groupTitleRefs: c.groupTitleRefs.map(t => t === oldTitle ? newTitle : t) })),
+      };
+    });
+  };
+  const updateGroupEmoji = (groupId, emoji) => {
+    updateGroup(groupId, g => ({ ...g, emoji }));
+  };
+  const addItem = (groupId) => {
+    updateGroup(groupId, g => ({ ...g, items: [...g.items, { id: newId(), label: "Нова стаття", amount: 0, currency: "main" }] }));
+  };
+  const updateItem = (groupId, itemId, patch) => {
+    updateGroup(groupId, g => ({ ...g, items: g.items.map(it => it.id === itemId ? { ...it, ...patch } : it) }));
+  };
+  const removeItem = (groupId, itemId) => {
+    updateGroup(groupId, g => ({ ...g, items: g.items.filter(it => it.id !== itemId) }));
+  };
+  const addGroup = () => {
+    setData(prev => ({
+      ...prev,
+      groups: [...prev.groups, { id: newId(), emoji: "🌷", title: "Нова категорія", color: "cream", items: [{ id: newId(), label: "Нова стаття", amount: 0, currency: "main" }] }],
+    }));
+  };
+  const removeGroup = (groupId) => {
+    setData(prev => {
+      const removedTitle = prev.groups.find(g => g.id === groupId)?.title;
+      return {
+        ...prev,
+        groups: prev.groups.filter(g => g.id !== groupId),
+        cards: prev.cards.map(c => ({ ...c, groupTitleRefs: c.groupTitleRefs.filter(t => t !== removedTitle) })),
+      };
+    });
+  };
+  const addCard = () => {
+    const colors = ["cream", "peach", "butter", "sage", "lavender", "rose", "mint", "sky"];
+    const used = data.cards.map(c => c.color);
+    const next = colors.find(c => !used.includes(c)) || colors[data.cards.length % colors.length];
+    setData(prev => ({
+      ...prev,
+      cards: [...prev.cards, { id: newId(), eyebrow: "Рахунок", emoji: "💎", title: "Новий рахунок", subtitle: "опис", groupTitleRefs: [], color: next }],
+    }));
+  };
+  const updateCard = (cardId, patch) => {
+    setData(prev => ({ ...prev, cards: prev.cards.map(c => c.id === cardId ? { ...c, ...patch } : c) }));
+  };
+  const removeCard = (cardId) => {
+    setData(prev => ({ ...prev, cards: prev.cards.filter(c => c.id !== cardId) }));
+  };
+  const toggleCardGroupRef = (cardId, groupTitle) => {
+    setData(prev => ({
+      ...prev,
+      cards: prev.cards.map(c => {
+        if (c.id !== cardId) return c;
+        const has = c.groupTitleRefs.includes(groupTitle);
+        return { ...c, groupTitleRefs: has ? c.groupTitleRefs.filter(t => t !== groupTitle) : [...c.groupTitleRefs, groupTitle] };
+      }),
+    }));
+  };
+
+  const futureMonths = [];
+  for (let offset = 1; offset <= 6; offset++) {
+    const d = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    const ym = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    if (!savedMonths.includes(ym) && ym !== currentMonth) futureMonths.push(ym);
+  }
+
+  const isNbuSupported = settings.secondaryCurrency && NBU_SUPPORTED.includes(settings.secondaryCurrency.toUpperCase());
+
+  return (
+    <>
+    <div className="container no-print">
+
+      <header className="header">
+        <div>
+          <p className="eyebrow">
+            Особистий бюджет · {savedMonths.length > 0 ? `${savedMonths.length} збережених місяців` : "перший запуск"}
+          </p>
+          <h1 className="title">Бюджет<br/><em>на місяць</em></h1>
+        </div>
+        <div className="header-controls">
+          <button className="btn btn-secondary" onClick={() => setShowSettings(true)}>
+            <Icon name="settings" size={14}/>
+            Валюта
+          </button>
+          <div style={{display:'flex', alignItems:'center', gap:'0.75rem'}}>
+            <Icon name="calendar" size={18} color="#5c4a3a"/>
+            <select value={selectedMonth} onChange={(e) => setSelectedMonth(e.target.value)}>
+              <option value={currentMonth}>{formatMonthLabel(currentMonth)} (поточний)</option>
+              {savedMonths.filter(m => m !== currentMonth).map(m => (
+                <option key={m} value={m}>{formatMonthLabel(m)}</option>
+              ))}
+              {futureMonths.map(ym => (
+                <option key={ym} value={ym}>{formatMonthLabel(ym)}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+      </header>
+
+      <section className="card card-lg income-section">
+        <div className="income-row">
+          <div className="income-label">
+            <Icon name="wallet" size={22} color="#2d1810"/>
+            <h2 className="income-title">Дохід місяця</h2>
+          </div>
+          <div style={{display:'flex', alignItems:'baseline', gap:'0.5rem'}}>
+            <input type="number" value={data.income} onChange={(e) => setData({...data, income: Number(e.target.value)})} className="num-input income-input" style={{width: 180}}/>
+            <span style={{fontSize:'0.875rem', color:'var(--ink-soft)'}}>{settings.mainCurrency}</span>
+          </div>
+        </div>
+        {settings.secondaryCurrency && (
+          <div className="currency-config">
+            <span style={{color:'var(--ink-soft)'}}>Курс:</span>
+            <span style={{fontFamily:"'Fraunces', serif", fontWeight:600}}>1 {settings.secondaryCurrency}</span>
+            <span style={{color:'var(--ink-soft)'}}>=</span>
+            <input type="number" step="0.0001" value={settings.rate} onChange={(e) => setSettings({...settings, rate: Number(e.target.value), rateSource: "manual"})} className="num-input num-input-sm"/>
+            <span style={{color:'var(--ink-soft)'}}>{settings.mainCurrency}</span>
+            {isNbuSupported && (
+              <button className="btn-mini" onClick={refreshNbuRate} disabled={rateLoading}>
+                <Icon name="refresh" size={12} className={rateLoading ? "spinning" : ""}/>
+                {rateLoading ? "..." : "НБУ"}
+              </button>
+            )}
+            <span className={"currency-info " + (rateError ? "error" : "")}>
+              {rateError ? rateError : settings.rateSource === "nbu" && settings.rateUpdatedAt ? `НБУ · ${settings.rateUpdatedAt}` : "вручну"}
+            </span>
+          </div>
+        )}
+      </section>
+
+      <div className="main-grid">
+
+        <div className="col-stack">
+          <p className="col-section-title">Витрати за категоріями</p>
+
+          {data.groups.map((group, idx) => (
+            <div key={group.id} className={"card card-c-" + (group.color || "cream")}>
+              <div className="card-header">
+                <div className="card-header-left">
+                  <span
+                    className="card-emoji"
+                    onClick={() => {
+                      const next = prompt("Введи новий емодзі:", group.emoji);
+                      if (next) updateGroupEmoji(group.id, next.slice(0, 2));
+                    }}
+                    title="Натисни щоб змінити"
+                  >
+                    {group.emoji || "📦"}
+                  </span>
+                  <input type="text" value={group.title} onChange={(e) => updateGroupTitle(group.id, e.target.value)} className="card-title"/>
+                </div>
+                <button className="btn-icon" onClick={() => removeGroup(group.id)} title="Видалити категорію">
+                  <Icon name="trash" size={14}/>
+                </button>
+              </div>
+
+              {group.items.map(item => (
+                <div key={item.id} className="row">
+                  <input type="text" value={item.label} onChange={(e) => updateItem(group.id, item.id, { label: e.target.value })} className="row-label-input"/>
+                  <div className="row-input-wrap">
+                    <input type="number" value={item.amount} onChange={(e) => updateItem(group.id, item.id, { amount: Number(e.target.value) })} className="num-input"/>
+                    {settings.secondaryCurrency ? (
+                      <select value={item.currency} onChange={(e) => updateItem(group.id, item.id, { currency: e.target.value })} style={{padding: '2px 4px', fontSize: '0.75rem', borderBottomWidth: '1px'}}>
+                        <option value="main">{settings.mainCurrency}</option>
+                        <option value="secondary">{settings.secondaryCurrency}</option>
+                      </select>
+                    ) : (
+                      <span className="row-unit">{settings.mainCurrency}</span>
+                    )}
+                    <button className="btn-icon" onClick={() => removeItem(group.id, item.id)} title="Видалити">
+                      <Icon name="trash" size={12}/>
+                    </button>
+                  </div>
+                </div>
+              ))}
+
+              {group.items.length === 0 && <p className="empty">Поки порожньо</p>}
+
+              <button className="btn-add" onClick={() => addItem(group.id)}>
+                <Icon name="plus" size={12}/> додати статтю
+              </button>
+
+              <div className="card-total">
+                <span className="card-total-label">Разом</span>
+                <span className="card-total-value">{formatMain(groupTotal(group))}</span>
+              </div>
+
+              <details className="ticket-config">
+                <summary className="ticket-config-summary">
+                  колір категорії
+                </summary>
+                <div className="ticket-config-tags">
+                  {TICKET_COLOR_OPTIONS.map(c => (
+                    <button
+                      key={c.code}
+                      onClick={() => updateGroup(group.id, g => ({ ...g, color: c.code }))}
+                      className={"tag-chip " + ((group.color || "cream") === c.code ? "tag-chip-on" : "tag-chip-off")}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+              </details>
+            </div>
+          ))}
+
+          <button className="btn-add btn-add-ticket" onClick={addGroup}>
+            <Icon name="plus" size={14}/> додати категорію
+          </button>
+        </div>
+
+        <div className="col-stack">
+          <p className="col-section-title">Розкладка по картках та рахунках</p>
+
+          {data.cards.map(card => (
+            <div key={card.id} className={"ticket ticket-c-" + card.color}>
+              <div className="ticket-eyebrow">
+                <div className="ticket-eyebrow-left">
+                  <span
+                    className="ticket-emoji"
+                    onClick={() => {
+                      const next = prompt("Введи новий емодзі:", card.emoji);
+                      if (next) updateCard(card.id, { emoji: next.slice(0, 2) });
+                    }}
+                    title="Натисни щоб змінити"
+                  >
+                    {card.emoji || "💎"}
+                  </span>
+                  <span>{card.eyebrow}</span>
+                </div>
+                <button className="btn-icon" onClick={() => removeCard(card.id)} title="Видалити">
+                  <Icon name="trash" size={14}/>
+                </button>
+              </div>
+              <input type="text" value={card.title} onChange={(e) => updateCard(card.id, { title: e.target.value })} className="ticket-title-input"/>
+              <input type="text" value={card.subtitle} onChange={(e) => updateCard(card.id, { subtitle: e.target.value })} className="ticket-sub-input" placeholder="опис"/>
+
+              <div className="ticket-row">
+                <span style={{fontSize:'0.75rem', color:'var(--ink-soft)'}}>сума</span>
+                <span className="ticket-amount">{formatMain(cardTotal(card))}</span>
+              </div>
+
+              <details className="ticket-config">
+                <summary className="ticket-config-summary">
+                  налаштувати ({card.groupTitleRefs.length === 0 ? "не привʼязано" : `привʼязано: ${card.groupTitleRefs.length}`})
+                </summary>
+                <div style={{marginTop:'0.5rem'}}>
+                  <div style={{fontSize:'0.7rem', color:'var(--ink-faded)', marginBottom:'0.4rem'}}>Категорії:</div>
+                  <div className="ticket-config-tags">
+                    {data.groups.map(g => {
+                      const checked = card.groupTitleRefs.includes(g.title);
+                      return (
+                        <button
+                          key={g.id}
+                          onClick={() => toggleCardGroupRef(card.id, g.title)}
+                          className={"tag-chip " + (checked ? "tag-chip-on" : "tag-chip-off")}
+                        >
+                          {checked ? '✓ ' : '+ '}{g.emoji} {g.title}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  <div style={{fontSize:'0.7rem', color:'var(--ink-faded)', marginTop:'0.7rem', marginBottom:'0.4rem'}}>Колір:</div>
+                  <div className="ticket-config-tags">
+                    {TICKET_COLOR_OPTIONS.map(c => (
+                      <button
+                        key={c.code}
+                        onClick={() => updateCard(card.id, { color: c.code })}
+                        className={"tag-chip " + (card.color === c.code ? "tag-chip-on" : "tag-chip-off")}
+                      >
+                        {c.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </details>
+            </div>
+          ))}
+
+          <button className="btn-add btn-add-ticket" onClick={addCard}>
+            <Icon name="plus" size={14}/> додати картку / рахунок
+          </button>
+        </div>
+      </div>
+
+      <section className="summary">
+        <div className="summary-grid">
+          <div>
+            <p className="stat-label">Дохід</p>
+            <p className="stat-value">{Number(data.income).toLocaleString("uk")} <span className="stat-unit">{settings.mainCurrency}</span></p>
+          </div>
+          <div>
+            <p className="stat-label">Витрати</p>
+            <p className="stat-value">{Math.round(totalSpent).toLocaleString("uk")} <span className="stat-unit">{settings.mainCurrency}</span></p>
+          </div>
+          <div>
+            <p className="stat-label">Залишок</p>
+            <p className={"stat-value " + (remainder < 0 ? "stat-value-red" : remainder > 0 ? "stat-value-green" : "")}>
+              {Math.round(remainder).toLocaleString("uk")} <span className="stat-unit">{settings.mainCurrency}</span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="actions">
+        <div className="btn-group">
+          <button onClick={saveMonth} className={"btn btn-primary " + (savedFlash ? "save-flash" : "")}>
+            <Icon name="save" size={16}/>
+            {savedFlash ? "Збережено!" : "Зберегти місяць"}
+          </button>
+          <button onClick={exportPdf} className="btn btn-secondary">
+            <Icon name="pdf" size={16}/>
+            Зберегти в PDF
+          </button>
+          <button onClick={() => setShowResetModal(true)} className="btn btn-secondary">
+            <Icon name="reset" size={16}/>
+            Скинути
+          </button>
+        </div>
+        <p className="actions-note">
+          Дані зберігаються у браузері (localStorage). Новий місяць копіює налаштування з попереднього.
+        </p>
+      </section>
+
+      {showSettings && (
+        <div className="modal-bg" onClick={(e) => { if (e.target === e.currentTarget) setShowSettings(false); }}>
+          <div className="modal">
+            <h3>Налаштування валюти</h3>
+            <p>Обери основну валюту для підсумків. За потреби додай другу — тоді кожну статтю можна вводити в будь-якій з двох. Курс автоматично оновлюється з НБУ.</p>
+
+            <div className="modal-field">
+              <label className="modal-label">Основна валюта</label>
+              <input type="text" value={settings.mainCurrency} onChange={(e) => setSettings({...settings, mainCurrency: e.target.value})} className="modal-input" placeholder="напр. грн, USD, EUR"/>
+            </div>
+
+            <div className="modal-field">
+              <label className="modal-label">Друга валюта (опціонально)</label>
+              <select
+                value={settings.secondaryCurrency}
+                onChange={(e) => {
+                  const code = e.target.value;
+                  setSettings({
+                    ...settings, secondaryCurrency: code,
+                    rate: code ? settings.rate : 1,
+                    rateSource: code ? settings.rateSource : "manual",
+                    rateUpdatedAt: code ? settings.rateUpdatedAt : null,
+                  });
+                  setRateError(null);
+                }}
+                className="modal-input"
+                style={{cursor: 'pointer'}}
+              >
+                {POPULAR_CURRENCIES.map(c => (
+                  <option key={c.code || "none"} value={c.code}>{c.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {settings.secondaryCurrency && (
+              <div className="modal-field">
+                <label className="modal-label">Курс: 1 {settings.secondaryCurrency} = ? {settings.mainCurrency}</label>
+                <div style={{display:'flex', gap:'0.5rem', alignItems:'center'}}>
+                  <input type="number" step="0.0001" value={settings.rate} onChange={(e) => setSettings({...settings, rate: Number(e.target.value), rateSource: "manual"})} className="modal-input"/>
+                  {isNbuSupported && (
+                    <button className="btn-mini" onClick={refreshNbuRate} disabled={rateLoading}>
+                      <Icon name="refresh" size={12} className={rateLoading ? "spinning" : ""}/>
+                      {rateLoading ? "..." : "НБУ"}
+                    </button>
+                  )}
+                </div>
+                {settings.rateSource === "nbu" && settings.rateUpdatedAt && (
+                  <p style={{fontSize:'0.75rem', color:'#15803d', margin:'0.4rem 0 0 0'}}>✓ Офіційний курс НБУ на {settings.rateUpdatedAt}</p>
+                )}
+                {rateError && (<p style={{fontSize:'0.75rem', color:'#b91c1c', margin:'0.4rem 0 0 0'}}>{rateError}</p>)}
+              </div>
+            )}
+
+            <div className="modal-actions">
+              <button className="btn btn-primary" onClick={() => setShowSettings(false)}>Готово</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showResetModal && (
+        <div className="modal-bg" onClick={(e) => { if (e.target === e.currentTarget) setShowResetModal(false); }}>
+          <div className="modal">
+            <h3>Скинути до шаблону?</h3>
+            <p>Усі категорії та картки цього місяця будуть замінені на стандартний шаблон. Інші збережені місяці не зачепить.</p>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowResetModal(false)}>Скасувати</button>
+              <button className="btn btn-primary" onClick={resetMonth}>Скинути</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+    </div>
+
+    <div className="print-area">
+      <div className="pa-header">
+        <div>
+          <p className="pa-subtitle">Особистий бюджет</p>
+          <h1 className="pa-title">{formatMonthLabel(selectedMonth)}</h1>
+        </div>
+        <div style={{textAlign:'right', fontSize:'8pt', color:'#78716c'}}>
+          {settings.secondaryCurrency && (
+            <div>1 {settings.secondaryCurrency} = {settings.rate} {settings.mainCurrency}{settings.rateSource === "nbu" && settings.rateUpdatedAt ? ` (НБУ · ${settings.rateUpdatedAt})` : ""}</div>
+          )}
+        </div>
+      </div>
+
+      <div className="pa-income">
+        <span className="pa-income-label">Дохід місяця</span>
+        <span className="pa-income-value">{Number(data.income).toLocaleString("uk")} {settings.mainCurrency}</span>
+      </div>
+
+      <div className="two-col">
+        <div className="pa-section">
+          <div className="pa-section-title">Витрати за категоріями</div>
+          {data.groups.map(group => (
+            <div key={group.id} className="pa-group">
+              <div className="pa-group-title">{group.emoji} {group.title}</div>
+              {group.items.map(item => {
+                const inMain = toMain(Number(item.amount) || 0, item.currency);
+                const isSecondary = item.currency === "secondary" && settings.secondaryCurrency;
+                return (
+                  <div key={item.id} className="pa-row">
+                    <span>{item.label}</span>
+                    <span>{isSecondary ? `${item.amount} ${settings.secondaryCurrency} (${Math.round(inMain).toLocaleString("uk")} ${settings.mainCurrency})` : `${Math.round(inMain).toLocaleString("uk")} ${settings.mainCurrency}`}</span>
+                  </div>
+                );
+              })}
+              <div className="pa-row-total">
+                <span>Разом</span>
+                <span>{formatMain(groupTotal(group))}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <div className="pa-section">
+          <div className="pa-section-title">Розкладка по картках</div>
+          {data.cards.map(card => (
+            <div key={card.id} className="pa-card">
+              <div className="pa-card-title">{card.emoji} {card.title}</div>
+              {card.subtitle && <div className="pa-card-sub">{card.eyebrow} · {card.subtitle}</div>}
+              <div className="pa-card-row">
+                <span style={{fontSize:'8pt', color:'#57534e'}}>сума</span>
+                <span className="pa-card-amount">{formatMain(cardTotal(card))}</span>
+              </div>
+              {card.groupTitleRefs.length > 0 && (
+                <div className="pa-card-tags">з категорій: {card.groupTitleRefs.join(", ")}</div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="pa-summary">
+        <div>
+          <div className="pa-stat-label">Дохід</div>
+          <div className="pa-stat-value">{Number(data.income).toLocaleString("uk")} {settings.mainCurrency}</div>
+        </div>
+        <div>
+          <div className="pa-stat-label">Витрати</div>
+          <div className="pa-stat-value">{Math.round(totalSpent).toLocaleString("uk")} {settings.mainCurrency}</div>
+        </div>
+        <div>
+          <div className="pa-stat-label">Залишок</div>
+          <div className={"pa-stat-value " + (remainder < 0 ? "pa-stat-red" : remainder > 0 ? "pa-stat-green" : "")}>
+            {Math.round(remainder).toLocaleString("uk")} {settings.mainCurrency}
+          </div>
+        </div>
+      </div>
+
+      <div className="pa-foot">
+        Згенеровано {new Date().toLocaleDateString("uk")} · Бюджет на місяць
+      </div>
+    </div>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+</body>
+</html>
