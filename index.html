@@ -313,6 +313,7 @@
     transition: all 0.2s;
   }
   .num-input:focus { border-bottom: 1.5px solid var(--accent); background: rgba(194, 65, 12, 0.05); }
+  .num-input::placeholder { color: var(--ink-faded); opacity: 0.5; }
   .num-input-sm { width: 80px; }
 
   select {
@@ -890,7 +891,7 @@ function App() {
             <h2 className="income-title">Дохід місяця</h2>
           </div>
           <div style={{display:'flex', alignItems:'baseline', gap:'0.5rem'}}>
-            <input type="number" value={data.income} onChange={(e) => setData({...data, income: Number(e.target.value)})} className="num-input income-input" style={{width: 180}}/>
+            <input type="number" value={data.income || ""} onChange={(e) => setData({...data, income: Number(e.target.value) || 0})} className="num-input income-input" style={{width: 180}} placeholder="0"/>
             <span style={{fontSize:'0.875rem', color:'var(--ink-soft)'}}>{settings.mainCurrency}</span>
           </div>
         </div>
@@ -944,7 +945,7 @@ function App() {
                 <div key={item.id} className="row">
                   <input type="text" value={item.label} onChange={(e) => updateItem(group.id, item.id, { label: e.target.value })} className="row-label-input"/>
                   <div className="row-input-wrap">
-                    <input type="number" value={item.amount} onChange={(e) => updateItem(group.id, item.id, { amount: Number(e.target.value) })} className="num-input"/>
+                    <input type="number" value={item.amount || ""} onChange={(e) => updateItem(group.id, item.id, { amount: Number(e.target.value) || 0 })} className="num-input" placeholder="0"/>
                     {settings.secondaryCurrency ? (
                       <select value={item.currency} onChange={(e) => updateItem(group.id, item.id, { currency: e.target.value })} style={{padding: '2px 4px', fontSize: '0.75rem', borderBottomWidth: '1px'}}>
                         <option value="main">{settings.mainCurrency}</option>
