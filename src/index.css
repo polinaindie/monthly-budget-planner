@@ -213,6 +213,40 @@
   .card-total-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ink-faded); font-weight: 500; }
   .card-total-value { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 1.4rem; letter-spacing: -0.02em; color: var(--ink); }
 
+  /* ====== Available-for-this-category (live remainder) ====== */
+  .avail-row {
+    margin-top: 0.6rem;
+    padding: 0.55rem 0.7rem;
+    border-radius: var(--r-sm);
+    background: rgba(59,109,17,0.07);
+  }
+  .avail-row.avail-over { background: rgba(184,52,43,0.08); }
+  .avail-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+  .avail-label { font-size: 0.64rem; text-transform: uppercase; letter-spacing: 0.03em; font-weight: 500; color: var(--ink-faded); }
+  .avail-over .avail-label { color: #b8342b; }
+  .avail-value { font-family: 'Inter', sans-serif; font-weight: 700; font-size: 0.95rem; color: var(--save-text); }
+  .avail-over .avail-value { color: #b8342b; }
+  .avail-bar {
+    margin-top: 0.4rem;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(28,26,23,0.08);
+    overflow: hidden;
+  }
+  .avail-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: var(--save-title);
+    transition: width 0.18s ease;
+  }
+  .avail-over .avail-bar-fill { background: #b8342b; }
+  .avail-note { margin-top: 0.35rem; font-size: 0.66rem; color: #b8342b; font-weight: 500; }
+
   /* ====== Tickets — у новому стилі, без вирізів-кружків ====== */
   .ticket {
     position: relative;

@@ -446,6 +446,11 @@ function App() {
   const totalSpent = groupsSpent + goalsMonthlyTotal;
   const remainder = (Number(data.income) || 0) - totalSpent;
   const cardTotal = card => data.groups.filter(g => card.groupTitleRefs.includes(g.title)).reduce((sum, g) => sum + groupTotal(g), 0);
+  // Скільки доходу лишається саме на цю категорію = дохід мінус усе, що вже
+  // зайнято рештою (інші категорії + заплановані внески цілей). Жива цифра:
+  // змінюєш суми деінде — цей залишок перераховується.
+  const spentOutside = group => totalSpent - groupTotal(group);
+  const availableForGroup = group => (Number(data.income) || 0) - spentOutside(group);
   // ===== Розподіл 50/30/20 з пріоритетними (зафіксованими) категоріями =====
   // Модель: спершу резервуємо вручну зафіксовані суми (group.fixed, у грн
   // основної валюти). Решта доходу ділиться між НЕзафіксованими категоріями
@@ -1043,7 +1048,28 @@ function App() {
     className: "card-total-value"
   }, formatMain(groupTotal(group)), income > 0 && /*#__PURE__*/React.createElement("span", {
     className: "card-pct"
-  }, pct(groupTotal(group)), "% доходу"))), income > 0 && /*#__PURE__*/React.createElement("div", {
+  }, pct(groupTotal(group)), "% доходу"))), income > 0 && (() => {
+    const avail = availableForGroup(group);
+    const used = groupTotal(group);
+    const over = used > avail + 0.5;
+    const ratio = avail > 0 ? Math.min(used / avail, 1) : (used > 0 ? 1 : 0);
+    return /*#__PURE__*/React.createElement("div", {
+      className: "avail-row" + (over ? " avail-over" : "")
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "avail-head"
+    }, /*#__PURE__*/React.createElement("span", {
+      className: "avail-label"
+    }, over ? "⚠ Перевищує доступне на цю категорію" : "Доступно на цю категорію"), /*#__PURE__*/React.createElement("span", {
+      className: "avail-value"
+    }, formatMain(Math.max(avail, 0)))), /*#__PURE__*/React.createElement("div", {
+      className: "avail-bar"
+    }, /*#__PURE__*/React.createElement("div", {
+      className: "avail-bar-fill",
+      style: { width: ratio * 100 + "%" }
+    })), over && /*#__PURE__*/React.createElement("div", {
+      className: "avail-note"
+    }, "На ", formatMain(used - avail), " більше, ніж лишилось доходу"));
+  })(), income > 0 && /*#__PURE__*/React.createElement("div", {
     className: "fix-row" + (isFixed(group) ? " fix-on" : "")
   }, /*#__PURE__*/React.createElement("label", {
     className: "fix-toggle",
